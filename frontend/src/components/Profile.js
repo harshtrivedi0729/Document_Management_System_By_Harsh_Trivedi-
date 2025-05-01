@@ -16,7 +16,6 @@ const Profile = () => {
           Software Engineer
         </Text>
       </VStack>
-
       <Posts />
     </Box>
   );

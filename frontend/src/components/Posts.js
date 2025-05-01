@@ -39,6 +39,28 @@ const Posts = () => {
     }, 1000);
   };
 
+  function extractS3KeyFromUrl(url) {
+    const match = url.match(/amazonaws\.com\/([^?]+)/);
+    return match ? match[1] : null;
+  }
+
+  const handleDelete = async (key) => {
+    try {
+      key = extractS3KeyFromUrl(key);
+      console.log(key);
+      await fetch(`http://localhost:4000/images/${encodeURIComponent(key)}`, {
+        method: "DELETE",
+        headers: {
+    "x-user-id": 'harsh-123'
+  }
+      });
+      setRefetch(s => s + 1); 
+    } catch (err) {
+      console.error("Delete failed", err);
+    }
+  };
+  
+
   return (
     <Box mt={6}>
       <input id="imageInput" type="file" hidden onChange={handleUpload} />
@@ -69,17 +91,50 @@ const Posts = () => {
         </Text>
       )}
 
-      <SimpleGrid columns={[1, 2, 3]} spacing={4}>
+      {/* <SimpleGrid columns={[1, 2, 3]} spacing={4}>
         {Array.isArray(imageUrls) && imageUrls.length > 0 &&
           imageUrls.map(url => (
             <Image src={url} alt="Uploaded file" key={url} />
           ))
         }
-      </SimpleGrid>
+      </SimpleGrid> */}
+
+<SimpleGrid columns={[1, 2, 3]} spacing={4}>
+  {Array.isArray(imageUrls) && imageUrls.length > 0 &&
+    imageUrls.map(url => (
+      <Box key={url} position="relative">
+        <Image src={url} alt="Uploaded file" borderRadius="md" />
+
+        <Button
+          size="xs"
+          colorScheme="red"
+          position="absolute"
+          top={2}
+          right={2}
+          onClick={() => handleDelete(url)}
+        >
+          Delete
+        </Button>
+
+        <Button
+          size="xs"
+          colorScheme="blue"
+          position="absolute"
+          top={2}
+          left={2}
+          onClick={() => window.open(url, '_blank')}
+        >
+          View
+        </Button>
+      </Box>
+    ))}
+</SimpleGrid>
+
+
+
     </Box>
   );
 };
-
 
 export default Posts;
 

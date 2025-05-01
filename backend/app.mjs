@@ -4,6 +4,7 @@ import cors from "cors";
 import multer, { memoryStorage } from "multer";
 import { uploadToS3 } from "./s3.mjs";
 import { getUserPresignedUrls } from "./s3.mjs";
+import { deleteFromS3 } from "./s3.mjs";
 
 const app = express();
 
@@ -19,27 +20,52 @@ app.use(
 );
 app.use(json());
 
-app.post("/images",upload.single("image"), (req, res) => {
+app.post("/images", upload.single("image"), async (req, res) => {
   const { file } = req;
   const userId = req.headers["x-user-id"];
 
-  if(!file || !userId) return res.status(400).json({message: "Bad request."}); 
-  
-  const {error, key} = uploadToS3({file, userId});
-  if (error) return res.status(500).json({message: error.message});
-  return res.status(201).json({key});
+  if (!file || !userId) return res.status(400).json({ message: "Bad request." });
+
+  try {
+    const { error, key } = await uploadToS3({ file, userId });
+    if (error) return res.status(500).json({ message: error.message });
+    // SQL
+    console.log("File uploaded successfully:",res.file);
+    return res.status(201).json({ key });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
 });
 
-app.get('/images', async (req, res) => {
+app.get("/images", async (req, res) => {
   const userId = req.headers["x-user-id"];
+  if (!userId) return res.status(400).json({ message: "Bad request." });
 
-  if(!userId) return res.status(400).json({message: "Bad request."}); 
+  try {
+    const { error, presignedUrls } = await getUserPresignedUrls(userId);
+    if (error) return res.status(500).json({ message: error.message });
+
+    return res.status(200).json({ urls: presignedUrls });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+});
+
+app.delete("/images/:key", async (req, res) => {
+  const key = decodeURIComponent(req.params.key);
+  const userId = req.headers["x-user-id"];
   
-  const {error, presignedUrls} = getUserPresignedUrls(userId)
-  if (error) return res.status(400).json({message: error.message});
+  try {
+    if (!key || !userId) {
+      return res.status(400).json({ message: "Missing key or user ID." });
+    }
+    const { error } = await deleteFromS3(key);
+    if (error) return res.status(500).json({ message: error.message });
 
-
-  return res.json(presignedUrls);
+    return res.status(200).json({ message: "Deleted successfully." });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
 });
 
 app.listen(PORT, () => {
