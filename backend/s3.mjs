@@ -1,6 +1,7 @@
 import { S3Client, PutObjectCommand, ListObjectsV2Command, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { v4 as uuid } from "uuid";
+import { saveFileMetadata, deleteFileMetadata } from "./db.mjs";
 
 const s3 = new S3Client({ region: process.env.AWS_REGION }); 
 const BUCKET = process.env.BUCKET; 
@@ -13,9 +14,16 @@ export const uploadToS3 = async ({ file, userId }) => {
         Body: file.buffer,
         ContentType: file.mimetype,
     });
+    console.log("Uploading to S3", { key, userId });
 
     try {
         await s3.send(command);
+        await saveFileMetadata({
+          file_name: file.originalname,
+          file_size: file.size,
+          s3_url: `https://${BUCKET}.s3.amazonaws.com/${key}`,
+          upload_timestamp: new Date().toISOString(),
+        });
         return { key };
     } catch (error) {
         console.log(error);

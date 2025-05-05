@@ -23,7 +23,7 @@ const Posts = () => {
 
   const handleUpload = e => {
     const file = e.target.files[0];
-    console.log(file);
+    // console.log(file);
   
     if (!validFileTypes.find(type => type === file.type)) {
       setError("File Must be in JPG/PNG Format.");
@@ -34,6 +34,7 @@ const Posts = () => {
     form.append('image', file);
 
     uploadImage(form);
+    
     setTimeout(() => {
       setRefetch(s => s + 1);
     }, 1000);
