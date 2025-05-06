@@ -1,42 +1,3 @@
-// import pg from "pg";
-// import dotenv from "dotenv";
-
-// dotenv.config(); // ✅ Load environment variables from .env
-
-// const { Pool } = pg;
-
-// const pool = new Pool({
-//   user: process.env.DB_USER,       // e.g., 'harshtrivedi'
-//   host: process.env.DB_HOST,       // e.g., 'localhost'
-//   database: process.env.DB_NAME,   // e.g., 'harsh_dms_db'
-//   password: process.env.DB_PASSWORD, // use DB_PASSWORD (not DB_PASS for consistency)
-//   port: process.env.DB_PORT || 5432,
-// });
-
-// // ✅ Save file metadata to PostgreSQL
-// export const saveFileMetadata = async ({ userId, fileName, fileSize, s3Key }) => {
-//     const query = `
-//       INSERT INTO file_metadata (user_id, file_name, file_size, s3_key, upload_timestamp)
-//       VALUES ($1, $2, $3, $4, NOW())
-//       RETURNING *;
-//     `;
-//     const values = [userId, fileName, fileSize, s3Key];
-  
-//     try {
-//       const result = await pool.query(query, values);
-//       console.log(result);
-//       return result.rows[0]; // Return the newly inserted row
-//     } catch (error) {
-//       console.error("Error saving file metadata:", error);
-//       throw new Error("Failed to save file metadata.");
-//     }
-// };
-  
-// // ✅ Optional: expose pool if needed elsewhere
-// export { pool };
-
-
-
 import pg from "pg";
 import dotenv from "dotenv";
 
@@ -52,7 +13,6 @@ const pool = new Pool({
   port: process.env.DB_PORT || 5432,
 });
 
-// console.log("Database connection established", pool);
 // Function to fetch all file metadata
 const fetchAllFiles = async () => {
   try {
@@ -62,19 +22,11 @@ const fetchAllFiles = async () => {
   } catch (error) {
     console.error('Error fetching file metadata:', error);
   } finally {
-    // await pool.end(); // Optional: close connection when done
   }
 };
 
 // Call the function
 fetchAllFiles();
-
-// const pool = new Pool({
-//     connectionString: 'postgresql://neondb_owner:npg_A5TzRa6yKEDX@ep-small-sea-a4o8gekl-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require',
-//     ssl: {
-//       rejectUnauthorized: false
-//     }
-//   });
 
 // Save file metadata to PostgreSQL
 export const saveFileMetadata = async ({ file_name, file_size, upload_timestamp, s3_url }) => {
@@ -102,7 +54,6 @@ export const saveFileMetadata = async ({ file_name, file_size, upload_timestamp,
     RETURNING *;
   `;
   // Use parameterized queries to prevent SQL injection
-  
   const values = [file_name, file_size, s3_url, upload_timestamp];
 
   try {
