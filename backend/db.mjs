@@ -1,7 +1,7 @@
 import pg from "pg";
 import dotenv from "dotenv";
 
-dotenv.config(); // Load environment variables from .env
+dotenv.config(); 
 
 const { Pool } = pg;
 
@@ -18,7 +18,7 @@ const fetchAllFiles = async () => {
   try {
     const result = await pool.query('SELECT * FROM file_metadata ORDER BY upload_timestamp DESC;');
     console.log('All File Metadata:');
-    console.table(result.rows); // Nicely formats as a table in console
+    console.table(result.rows); 
   } catch (error) {
     console.error('Error fetching file metadata:', error);
   } finally {
