@@ -1,3 +1,7 @@
+## 📞 Contact:
+- +919875281821
+- harshtrivedi2907@gmail.com
+
 # 📄 Document Management System (DMS)
 
 A robust, lightweight Document Management System (DMS) built using **ReactJS (Material UI), NodeJS (ExpressJS/NestJS), AWS S3, and SQL** . 
